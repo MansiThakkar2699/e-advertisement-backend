@@ -17,6 +17,39 @@ const registerUser = async (req, res) => {
     }
 }
 
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body
+        const foundUserFromEmail = await userSchema.findOne({ email: email })
+        if (foundUserFromEmail) {
+            const isPasswordMatched = await bcrypt.compare(password, foundUserFromEmail.password)
+            if (isPasswordMatched) {
+                res.json({
+                    message: "Login Success",
+                    data: foundUserFromEmail,
+                    role: foundUserFromEmail.role
+                })
+            }
+            else {
+                res.status(401).json({
+                    message: "Invalid Credencials"
+                })
+            }
+        }
+        else {
+            res.status(404).json({
+                message: "User not found"
+            })
+        }
+    } catch (error) {
+        res.json({
+            message: "error while logging",
+            error: error
+        })
+    }
+}
+
 module.exports = {
-    registerUser
+    registerUser,
+    loginUser
 }
