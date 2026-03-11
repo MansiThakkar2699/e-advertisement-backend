@@ -1,10 +1,12 @@
 const userSchema = require("../models/UserModel")
 const bcrypt = require("bcrypt")
+const mailSend = require("../utils/MailUtil")
 
 const registerUser = async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
         const savedUser = await userSchema.create({ ...req.body, password: hashedPassword })
+        await mailSend(savedUser.email, savedUser.fullName, savedUser.role)
         res.status(201).json({
             message: "User Created Successfully",
             data: savedUser
