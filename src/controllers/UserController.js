@@ -53,7 +53,7 @@ const loginUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
     try {
-        const allUsers = await userSchema.find({ status: "active" })
+        const allUsers = await userSchema.find({ role: { $ne: 'admin' }, status: { $ne: 'deleted' } })
         res.json({
             message: "Users Fetched Successfully",
             data: allUsers
