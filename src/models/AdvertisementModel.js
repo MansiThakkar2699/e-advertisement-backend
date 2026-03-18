@@ -6,6 +6,10 @@ const advertisementSchema = new Schema({
         type: mongoose.Types.ObjectId,
         ref: "users"
     },
+    category_id: {
+        type: mongoose.Types.ObjectId,
+        ref: "categories"
+    },
     ad_title: {
         type: String,
         required: true

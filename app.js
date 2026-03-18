@@ -23,6 +23,9 @@ app.use("/feedback", feedbackRoutes)
 const analyticsRoutes = require("./src/routes/AnalyticsRoutes")
 app.use("/analytics", analyticsRoutes)
 
+const categoryRoutes = require("./src/routes/CategoryRoutes")
+app.use("/category", categoryRoutes)
+
 const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`server started on port ${PORT}`)

@@ -1,6 +1,9 @@
 const userSchema = require("../models/UserModel")
 const bcrypt = require("bcrypt")
 const mailSend = require("../utils/MailUtil")
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
+const secret = process.env.JWT_SECRET
 
 const registerUser = async (req, res) => {
     try {
@@ -26,9 +29,10 @@ const loginUser = async (req, res) => {
         if (foundUserFromEmail) {
             const isPasswordMatched = await bcrypt.compare(password, foundUserFromEmail.password)
             if (isPasswordMatched) {
+                const token = jwt.sign(foundUserFromEmail.toObject(),secret);
                 res.json({
                     message: "Login Success",
-                    data: foundUserFromEmail,
+                    token:token,
                     role: foundUserFromEmail.role
                 })
             }
