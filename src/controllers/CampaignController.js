@@ -9,6 +9,7 @@ const createCampaign = async (req, res) => {
         })
 
     } catch (error) {
+        console.log(error)
         res.json({
             message: "error while creating campaign",
             error: error
@@ -18,7 +19,7 @@ const createCampaign = async (req, res) => {
 
 const getAllCampaigns = async (req, res) => {
     try {
-        const allCampaigns = await campaignSchema.find({ status: "active" }).populate("ad_id")
+        const allCampaigns = await campaignSchema.find({ status: { $ne: 'deleted' } }).populate("advertiser_id")
         res.json({
             message: "Campaign fetch successfully",
             data: allCampaigns
@@ -33,7 +34,7 @@ const getAllCampaigns = async (req, res) => {
 
 const getCampaignById = async (req, res) => {
     try {
-        const foundCampaign = await campaignSchema.findById(req.params.id).populate("ad_id")
+        const foundCampaign = await campaignSchema.findById(req.params.id).populate("advertiser_id")
         if (foundCampaign) {
             res.json({
                 message: "Campaign found",
@@ -95,48 +96,9 @@ const deleteCampaign = async (req, res) => {
     }
 }
 
-const updateCampaignStatus = async (req, res) => {
+const getCampaignByAdvertiserId = async (req, res) => {
     try {
-
-        const { status } = req.body;
-
-        const allowedStatus = ["active", "inactive", "blocked"];
-
-        if (!allowedStatus.includes(status)) {
-            res.status(400).json({
-                message: "Invalid status value"
-            })
-        }
-
-        const updatedCampaign = await campaignSchema.findByIdAndUpdate(
-            req.params.id,
-            { status: status },
-            { new: true }
-        );
-
-        if (updatedCampaign) {
-            res.json({
-                message: "Campaign status updated successfully",
-                data: updatedCampaign
-            })
-        }
-        else {
-            res.status(404).json({
-                message: "Campaign not found"
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: "Error while updating campaign status",
-            error: error
-        })
-    }
-}
-
-const getCampaignByAdvertisementId = async (req, res) => {
-    try {
-        const foundCampaign = await campaignSchema.find({ ad_id: req.params.ad_id, status: "active" }).populate("ad_id")
+        const foundCampaign = await campaignSchema.find({ advertiser_id: req.params.advertiser_id, status: "active" }).populate("advertiser_id")
         if (foundCampaign) {
             res.json({
                 message: "Campaign found",
@@ -162,6 +124,5 @@ module.exports = {
     getCampaignById,
     updateCampaign,
     deleteCampaign,
-    updateCampaignStatus,
-    getCampaignByAdvertisementId
+    getCampaignByAdvertiserId
 }

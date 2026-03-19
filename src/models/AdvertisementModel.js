@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema
 
 const advertisementSchema = new Schema({
-    advertiser_id: {
+    campaign_id: {
         type: mongoose.Types.ObjectId,
-        ref: "users"
+        ref: "campaigns"
     },
     category_id: {
         type: mongoose.Types.ObjectId,

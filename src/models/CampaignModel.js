@@ -2,9 +2,13 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema
 
 const campaignSchema = new Schema({
-    ad_id: {
+    advertiser_id: {
         type: mongoose.Types.ObjectId,
-        ref: "advertisements"
+        ref: "users"
+    },
+    name: {
+        type: String,
+        required: true
     },
     budget: {
         type: Number,

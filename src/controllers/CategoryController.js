@@ -26,7 +26,7 @@ const createCategory = async (req, res) => {
 
 const getAllCategories = async (req, res) => {
     try {
-        const allCategories = await categorySchema.find()
+        const allCategories = await categorySchema.find({ status: { $ne: 'deleted' } })
         res.json({
             message: "Categories fetch successfully",
             data: allCategories

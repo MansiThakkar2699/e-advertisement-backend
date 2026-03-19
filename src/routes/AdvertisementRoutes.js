@@ -6,6 +6,6 @@ router.get("/advertisements", advertisementController.getAllAdvertisements)
 router.get("/advertisement/:id", advertisementController.getAdvertisementById)
 router.delete("/advertisement/:id", advertisementController.deleteAdvertisement)
 router.put("/advertisement/:id", advertisementController.updateAdvertisement)
-router.put("/advertisement-status/:id", advertisementController.updateAdvertisementStatus)
-router.get("/advertisement/advertiser/:advertiser_id", advertisementController.getAdvertisementByAdvertiserId)
+router.get("/advertisement/campaign/:campaign_id", advertisementController.getAdvertisementByCampaignId)
+router.get("/advertisement/category/:category_id", advertisementController.getAdvertisementByCategoryId)
 module.exports = router

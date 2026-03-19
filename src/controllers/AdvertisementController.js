@@ -18,7 +18,7 @@ const createAdvertisement = async (req, res) => {
 
 const getAllAdvertisements = async (req, res) => {
     try {
-        const allAdvertisements = await advertisementSchema.find({ status: "active" }).populate("advertiser_id")
+        const allAdvertisements = await advertisementSchema.find({ status: { $ne: 'deleted' } }).populate("campaign_id").populate("category_id")
         res.json({
             message: "Advertisements fetch successfully",
             data: allAdvertisements
@@ -34,7 +34,7 @@ const getAllAdvertisements = async (req, res) => {
 
 const getAdvertisementById = async (req, res) => {
     try {
-        const foundAdvertisement = await advertisementSchema.findById(req.params.id).populate("advertiser_id")
+        const foundAdvertisement = await advertisementSchema.findById(req.params.id).populate("campaign_id").populate("category_id")
         if (foundAdvertisement) {
             res.json({
                 message: "Advertisement found",
@@ -96,48 +96,31 @@ const deleteAdvertisement = async (req, res) => {
     }
 }
 
-const updateAdvertisementStatus = async (req, res) => {
+const getAdvertisementByCampaignId = async (req, res) => {
     try {
-
-        const { status } = req.body;
-
-        const allowedStatus = ["active", "inactive", "blocked", "paused"];
-
-        if (!allowedStatus.includes(status)) {
-            res.status(400).json({
-                message: "Invalid status value"
-            })
-        }
-
-        const updatedAdvertisement = await advertisementSchema.findByIdAndUpdate(
-            req.params.id,
-            { status: status },
-            { new: true }
-        );
-
-        if (updatedAdvertisement) {
+        const foundAdvertisement = await advertisementSchema.find({ campaign_id: req.params.campaign_id, status: "active" }).populate("campaign_id").populate("category_id")
+        if (foundAdvertisement) {
             res.json({
-                message: "Advertisement status updated successfully",
-                data: updatedAdvertisement
+                message: "Advertisement found",
+                data: foundAdvertisement
             })
-        }
-        else {
+        } else {
             res.status(404).json({
                 message: "Advertisement not found"
-            });
+            })
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: "Error while updating advertisement status",
+        console.log(error)
+        res.json({
+            message: "getting error while fetching advertisement",
             error: error
         })
     }
 }
 
-const getAdvertisementByAdvertiserId = async (req, res) => {
+const getAdvertisementByCategoryId = async (req, res) => {
     try {
-        const foundAdvertisement = await advertisementSchema.find({ advertiser_id: req.params.advertiser_id, status: "active" }).populate("advertiser_id")
+        const foundAdvertisement = await advertisementSchema.find({ category_id: req.params.category_id, status: "active" }).populate("campaign_id").populate("category_id")
         if (foundAdvertisement) {
             res.json({
                 message: "Advertisement found",
@@ -163,6 +146,6 @@ module.exports = {
     getAdvertisementById,
     updateAdvertisement,
     deleteAdvertisement,
-    updateAdvertisementStatus,
-    getAdvertisementByAdvertiserId
+    getAdvertisementByCampaignId,
+    getAdvertisementByCategoryId
 }
