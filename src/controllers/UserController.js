@@ -1,4 +1,5 @@
 const userSchema = require("../models/UserModel")
+const uploadToCloudinary = require("../utils/CloudinaryUtil")
 const bcrypt = require("bcrypt")
 const mailSend = require("../utils/MailUtil")
 const jwt = require("jsonwebtoken")
@@ -29,10 +30,10 @@ const loginUser = async (req, res) => {
         if (foundUserFromEmail) {
             const isPasswordMatched = await bcrypt.compare(password, foundUserFromEmail.password)
             if (isPasswordMatched) {
-                const token = jwt.sign(foundUserFromEmail.toObject(),secret);
+                const token = jwt.sign({ id: foundUserFromEmail._id }, secret, { expiresIn: 60 * 24 * 7 });
                 res.json({
                     message: "Login Success",
-                    token:token,
+                    token: token,
                     role: foundUserFromEmail.role
                 })
             }
@@ -152,11 +153,38 @@ const updateUserStatus = async (req, res) => {
     }
 }
 
+const updateUser = async (req, res) => {
+    try {
+        let imageUrl = null;
+        if (req.file && req.file.path) {
+            const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+            imageUrl = cloudinaryResponse.secure_url;
+        }
+        const updatedUser = await userSchema.findByIdAndUpdate(req.params.id, { ...req.body, ...(imageUrl && { profilePic: imageUrl }) }, { new: true })
+        if (updatedUser) {
+            res.json({
+                message: "User Updated Successfully",
+                data: updatedUser
+            })
+        } else {
+            res.status(404).json({
+                message: "User not found"
+            })
+        }
+    } catch (error) {
+        res.json({
+            message: "getting error while updating user",
+            error: error
+        })
+    }
+}
+
 module.exports = {
     registerUser,
     loginUser,
     getAllUsers,
     getUserById,
     deleteUser,
-    updateUserStatus
+    updateUserStatus,
+    updateUser
 }

@@ -17,21 +17,107 @@ const createFeedback = async (req, res) => {
 
 const getAllFeedback = async (req, res) => {
     try {
-        const allFeedback = await feedbackSchema
-            .find()
-            .populate("viewer_id")
-            .populate("ad_id");
+
+        const {
+            search = "",
+            advertisement,
+            sort,
+            page = 1,
+            limit = 6
+        } = req.query;
+
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        let matchStage = {};
+
+        // Filter by advertisement
+        if (advertisement) {
+            matchStage.ad_id = new mongoose.Types.ObjectId(advertisement);
+        }
+
+        let sortStage = {};
+
+        if (sort === "high") sortStage.rating = -1;
+        if (sort === "low") sortStage.rating = 1;
+
+        const pipeline = [
+
+            { $match: matchStage },
+
+            // Join viewer
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "viewer_id",
+                    foreignField: "_id",
+                    as: "viewer"
+                }
+            },
+
+            { $unwind: "$viewer" },
+
+            // Join advertisement
+            {
+                $lookup: {
+                    from: "advertisements",
+                    localField: "ad_id",
+                    foreignField: "_id",
+                    as: "advertisement"
+                }
+            },
+
+            { $unwind: "$advertisement" },
+
+            // Search viewer name
+            {
+                $match: {
+                    "viewer.fullName": {
+                        $regex: search,
+                        $options: "i"
+                    }
+                }
+            },
+
+            // Sort rating
+            ...(Object.keys(sortStage).length ? [{ $sort: sortStage }] : []),
+
+            // Pagination + total count
+            {
+                $facet: {
+                    metadata: [
+                        { $count: "totalRecords" }
+                    ],
+                    data: [
+                        { $skip: (pageNumber - 1) * limitNumber },
+                        { $limit: limitNumber }
+                    ]
+                }
+            }
+        ];
+
+        const result = await feedbackSchema.aggregate(pipeline);
+
+        const feedbacks = result[0].data;
+        const totalRecords = result[0].metadata[0]?.totalRecords || 0;
+
         res.json({
             message: "All feedback fetched successfully",
-            data: allFeedback
+            currentPage: pageNumber,
+            totalRecords,
+            totalPages: Math.ceil(totalRecords / limitNumber),
+            data: feedbacks
         });
+
     } catch (error) {
-        res.json({
+
+        res.status(500).json({
             message: "Error fetching feedback",
-            error: error
-        })
+            error: error.message
+        });
+
     }
-}
+};
 
 const updateFeedback = async (req, res) => {
     try {

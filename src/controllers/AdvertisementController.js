@@ -1,14 +1,25 @@
-const advertisementSchema = require("../models/AdvertisementModel")
+const advertisementSchema = require("../models/AdvertisementModel");
+const { countDocuments } = require("../models/CategoryModel");
+const uploadToCloudinary = require("../utils/CloudinaryUtil")
 
 const createAdvertisement = async (req, res) => {
     try {
-        const advertisement = await advertisementSchema.create(req.body)
+        let imageUrl = null;
+        if (req.file && req.file.path) {
+            const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+            imageUrl = cloudinaryResponse.secure_url;
+        }
+        const advertisement = await advertisementSchema.create({
+            ...req.body,
+            ...(imageUrl && { content: imageUrl })
+        })
         res.status(201).json({
             message: "Advertisement Created",
             data: advertisement
         })
 
     } catch (error) {
+        console.log(error)
         res.json({
             message: "error while creating advertisement",
             error: error
@@ -55,7 +66,12 @@ const getAdvertisementById = async (req, res) => {
 
 const updateAdvertisement = async (req, res) => {
     try {
-        const updatedAdvertisement = await advertisementSchema.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        let imageUrl = null;
+        if (req.file && req.file.path) {
+            const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+            imageUrl = cloudinaryResponse.secure_url;
+        }
+        const updatedAdvertisement = await advertisementSchema.findByIdAndUpdate(req.params.id, { ...req.body, ...(imageUrl && { content: imageUrl }) }, { new: true })
         if (updatedAdvertisement) {
             res.json({
                 message: "Advertisement Updated Successfully",
@@ -67,6 +83,7 @@ const updateAdvertisement = async (req, res) => {
             })
         }
     } catch (error) {
+        console.log(error)
         res.json({
             message: "getting error while updating advertisement",
             error: error

@@ -9,7 +9,7 @@ const uploadToCloudinary = async (path) => {
         api_secret: process.env.CLOUDINARY_API_SECRET
     })
 
-    const res = await cloudinary.uploader.upload(path)
+    const res = await cloudinary.uploader.upload(path, { resource_type: "auto" })
     return res
 
 }
