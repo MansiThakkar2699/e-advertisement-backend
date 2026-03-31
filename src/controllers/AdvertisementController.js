@@ -1,6 +1,6 @@
 const advertisementSchema = require("../models/AdvertisementModel");
-const { countDocuments } = require("../models/CategoryModel");
 const uploadToCloudinary = require("../utils/CloudinaryUtil")
+const logger = require('../utils/logger');
 
 const createAdvertisement = async (req, res) => {
     try {
@@ -19,7 +19,7 @@ const createAdvertisement = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error)
+        logger.error('error while creating advertisement', error);
         res.json({
             message: "error while creating advertisement",
             error: error
@@ -29,34 +29,54 @@ const createAdvertisement = async (req, res) => {
 
 const getAllAdvertisements = async (req, res) => {
     try {
-        const allAdvertisements = await advertisementSchema.find({ status: { $ne: 'deleted' } }).populate("campaign_id").populate("category_id")
+        // Wrap the path and nested populate in a single object {}
+        const allAdvertisements = await advertisementSchema.find({ status: { $ne: 'deleted' } })
+            .populate({
+                path: 'campaign_id',
+                populate: {
+                    path: 'advertiser_id',
+                    model: 'users',
+                }
+            })
+            .populate("category_id");
+
         res.json({
-            message: "Advertisements fetch successfully",
+            message: "Advertisements fetched successfully",
             data: allAdvertisements
-        })
+        });
     } catch (error) {
-        console.log(error)
-        res.json({
-            message: "error while fetching advertisements",
-            error: error
-        })
+        logger.error('Error while fetching advertisements', error)
+        res.status(500).json({
+            message: "Error while fetching advertisements",
+            error: error.message
+        });
     }
 }
 
 const getAdvertisementById = async (req, res) => {
     try {
-        const foundAdvertisement = await advertisementSchema.findById(req.params.id).populate("campaign_id").populate("category_id")
+        const foundAdvertisement = await advertisementSchema.findById(req.params.id)
+            .populate({
+                path: 'campaign_id',
+                populate: {
+                    path: 'advertiser_id',
+                    model: 'users',
+                }
+            })
+            .populate("category_id")
         if (foundAdvertisement) {
             res.json({
                 message: "Advertisement found",
                 data: foundAdvertisement
             })
         } else {
+            logger.error("Advertisement not found");
             res.status(404).json({
                 message: "Advertisement not found"
             })
         }
     } catch (error) {
+        logger.error("getting error while fetching advertisement", error);
         res.json({
             message: "getting error while fetching advertisement",
             error: error
@@ -78,12 +98,13 @@ const updateAdvertisement = async (req, res) => {
                 data: updatedAdvertisement
             })
         } else {
+            logger.error("Advertisement not found")
             res.status(404).json({
                 message: "Advertisement not found"
             })
         }
     } catch (error) {
-        console.log(error)
+        logger.error("getting error while updating advertisement", error)
         res.json({
             message: "getting error while updating advertisement",
             error: error
@@ -100,12 +121,13 @@ const deleteAdvertisement = async (req, res) => {
                 data: deletedAdvertisement
             })
         } else {
+            logger.error("Advertisement not found")
             res.status(404).json({
                 message: "Advertisement not found"
             })
         }
     } catch (error) {
-        console.log(error)
+        logger.error("getting error while deleting advertisement", error)
         res.json({
             message: "getting error while deleting advertisement",
             error: error
@@ -115,19 +137,28 @@ const deleteAdvertisement = async (req, res) => {
 
 const getAdvertisementByCampaignId = async (req, res) => {
     try {
-        const foundAdvertisement = await advertisementSchema.find({ campaign_id: req.params.campaign_id, status: "active" }).populate("campaign_id").populate("category_id")
+        const foundAdvertisement = await advertisementSchema.find({ campaign_id: req.params.campaign_id, status: "active" })
+            .populate({
+                path: 'campaign_id',
+                populate: {
+                    path: 'advertiser_id',
+                    model: 'users',
+                }
+            })
+            .populate("category_id")
         if (foundAdvertisement) {
             res.json({
                 message: "Advertisement found",
                 data: foundAdvertisement
             })
         } else {
+            logger.error("Advertisement not found")
             res.status(404).json({
                 message: "Advertisement not found"
             })
         }
     } catch (error) {
-        console.log(error)
+        logger.error("getting error while fetching advertisement", error)
         res.json({
             message: "getting error while fetching advertisement",
             error: error
@@ -137,19 +168,28 @@ const getAdvertisementByCampaignId = async (req, res) => {
 
 const getAdvertisementByCategoryId = async (req, res) => {
     try {
-        const foundAdvertisement = await advertisementSchema.find({ category_id: req.params.category_id, status: "active" }).populate("campaign_id").populate("category_id")
+        const foundAdvertisement = await advertisementSchema.find({ category_id: req.params.category_id, status: "active" })
+            .populate({
+                path: 'campaign_id',
+                populate: {
+                    path: 'advertiser_id',
+                    model: 'users',
+                }
+            })
+            .populate("category_id")
         if (foundAdvertisement) {
             res.json({
                 message: "Advertisement found",
                 data: foundAdvertisement
             })
         } else {
+            logger.error("Advertisement not found")
             res.status(404).json({
                 message: "Advertisement not found"
             })
         }
     } catch (error) {
-        console.log(error)
+        logger.error("getting error while fetching advertisement", error)
         res.json({
             message: "getting error while fetching advertisement",
             error: error

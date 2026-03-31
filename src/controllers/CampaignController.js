@@ -1,4 +1,5 @@
 const campaignSchema = require("../models/CampaignModel")
+const logger = require('../utils/logger');
 
 const createCampaign = async (req, res) => {
     try {
@@ -9,7 +10,7 @@ const createCampaign = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error)
+        logger.error("error while creating campaign", error)
         res.json({
             message: "error while creating campaign",
             error: error
@@ -25,6 +26,7 @@ const getAllCampaigns = async (req, res) => {
             data: allCampaigns
         })
     } catch (error) {
+        logger.error("error while fetching campaigns", error)
         res.json({
             message: "error while fetching campaigns",
             error: error
@@ -41,11 +43,13 @@ const getCampaignById = async (req, res) => {
                 data: foundCampaign
             })
         } else {
+            logger.error("Campaign not found")
             res.status(404).json({
                 message: "Campaign not found"
             })
         }
     } catch (error) {
+        logger.error("getting error while fetching campaign", error)
         res.json({
             message: "getting error while fetching campaign",
             error: error
@@ -62,11 +66,13 @@ const updateCampaign = async (req, res) => {
                 data: updatedCampaign
             })
         } else {
+            logger.error("Campaign not found")
             res.status(404).json({
                 message: "Campaign not found"
             })
         }
     } catch (error) {
+        logger.error("getting error while updating campaign", error)
         res.json({
             message: "getting error while updating campaign",
             error: error
@@ -83,12 +89,13 @@ const deleteCampaign = async (req, res) => {
                 data: deletedCampaign
             })
         } else {
+            logger.error("Campaign not found")
             res.status(404).json({
                 message: "Campaign not found"
             })
         }
     } catch (error) {
-        console.log(error)
+        logger.error("getting error while deleting campaign", error)
         res.json({
             message: "getting error while deleting campaign",
             error: error
@@ -105,12 +112,13 @@ const getCampaignByAdvertiserId = async (req, res) => {
                 data: foundCampaign
             })
         } else {
+            logger.error("Campaign not found")
             res.status(404).json({
                 message: "Campaign not found"
             })
         }
     } catch (error) {
-        console.log(error)
+        logger.error("getting error while fetching campaign", error)
         res.json({
             message: "getting error while fetching campaign",
             error: error

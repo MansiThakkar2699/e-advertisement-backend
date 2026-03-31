@@ -1,13 +1,17 @@
 const router = require("express").Router()
 const userController = require("../controllers/UserController")
 const upload = require("../middleware/UploadMiddleware")
+const validateToken = require("../middleware/AuthMiddleware")
 
 router.post("/register", userController.registerUser)
 router.post("/login", userController.loginUser)
-router.get("/users", userController.getAllUsers)
-router.get("/user/:id", userController.getUserById)
-router.delete("/user/:id", userController.deleteUser)
-router.put("/user/status/:id", userController.updateUserStatus)
-router.put("/user/:id", upload.single("profilePic"), userController.updateUser)
+router.get("/users", validateToken, userController.getAllUsers)
+router.get("/user/:id", validateToken, userController.getUserById)
+router.delete("/user/:id", validateToken, userController.deleteUser)
+router.put("/user/status/:id", validateToken, userController.updateUserStatus)
+router.put("/user/:id", validateToken, upload.single("profilePic"), userController.updateUser)
+router.put("/change-password/:userId", validateToken, userController.changePassword);
+router.post("/forgotpassword", userController.forgotPassword)
+router.put("/resetpassword", userController.resetPassword)
 
 module.exports = router

@@ -1,4 +1,6 @@
+const mongoose = require("mongoose")
 const feedbackSchema = require("../models/FeedbackModel")
+const logger = require('../utils/logger');
 
 const createFeedback = async (req, res) => {
     try {
@@ -8,6 +10,7 @@ const createFeedback = async (req, res) => {
             data: createdFeedback
         });
     } catch (error) {
+        logger.error("Error creating feedback", error)
         res.json({
             message: "Error creating feedback",
             error: error
@@ -108,12 +111,11 @@ const getAllFeedback = async (req, res) => {
             totalPages: Math.ceil(totalRecords / limitNumber),
             data: feedbacks
         });
-
     } catch (error) {
-
+        logger.error("Error fetching feedback", error)
         res.status(500).json({
             message: "Error fetching feedback",
-            error: error.message
+            error: error
         });
 
     }
@@ -132,11 +134,13 @@ const updateFeedback = async (req, res) => {
                 data: updatedFeedback
             });
         } else {
+            logger.error("Feedback not found")
             res.status(404).json({
                 message: "Feedback not found"
             })
         }
     } catch (error) {
+        logger.error("Error updating feedback", error)
         res.json({
             message: "Error updating feedback",
             error: error
@@ -154,6 +158,7 @@ const getFeedbackByAdvertisement = async (req, res) => {
             data: feedback
         });
     } catch (error) {
+        logger.error("Error fetching feedback", error)
         res.json({
             message: "Error fetching feedback",
             error: error
@@ -171,6 +176,7 @@ const getFeedbackByViewer = async (req, res) => {
             data: feedback
         });
     } catch (error) {
+        logger.error("Error fetching feedback", error)
         res.json({
             message: "Error fetching feedback",
             error: error

@@ -1,40 +1,61 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema
 
-const campaignSchema = new Schema({
-    advertiser_id: {
-        type: mongoose.Types.ObjectId,
-        ref: "users"
+const campaignSchema = new Schema(
+    {
+        advertiser_id: {
+            type: mongoose.Types.ObjectId,
+            ref: "users"
+        },
+        name: {
+            type: String,
+            required: true
+        },
+        totalBudget: {
+            type: Number
+        },
+
+        dailyBudget: {
+            type: Number
+        },
+        start_date: {
+            type: Date,
+            required: true
+        },
+        end_date: {
+            type: Date,
+        },
+        platforms: [
+            {
+                type: String
+            }
+        ],
+        targetAudience: {
+
+            ageMin: Number,
+            ageMax: Number,
+
+            gender: {
+                type: String,
+                enum: ["male", "female", "all"],
+                default: "all"
+            },
+
+            location: String,
+
+            interests: [
+                {
+                    type: String
+                }
+            ]
+        },
+        status: {
+            type: String,
+            default: "pending",
+            enum: ["active", "paused", "completed", "deleted", "rejected", "pending"]
+        }
     },
-    name: {
-        type: String,
-        required: true
-    },
-    budget: {
-        type: Number,
-        required: true
-    },
-    start_date: {
-        type: Date,
-        required: true
-    },
-    end_date: {
-        type: Date,
-        required: true
-    },
-    target_location: {
-        type: String,
-        required: true
-    },
-    target_age: {
-        type: String,
-        required: true
-    },
-    status: {
-        type: String,
-        default: "active",
-        enum: ["active", "inactive", "deleted", "blocked"]
-    }
-});
+    { timestamps: true }
+);
 
 module.exports = mongoose.model("campaigns", campaignSchema);

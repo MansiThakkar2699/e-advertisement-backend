@@ -1,7 +1,9 @@
 const express = require("express")
-const app = express()
+require("./src/cron/campaignCron");
 const cors = require("cors")
 require("dotenv").config()
+const app = express()
+
 app.use(express.json())
 app.use(cors())
 

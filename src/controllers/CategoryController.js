@@ -1,5 +1,6 @@
 const categorySchema = require("../models/CategoryModel")
 const uploadToCloudinary = require("../utils/CloudinaryUtil")
+const logger = require('../utils/logger');
 
 const createCategory = async (req, res) => {
     try {
@@ -16,7 +17,7 @@ const createCategory = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error)
+        logger.error("error while creating category", error)
         res.json({
             message: "error while creating category",
             error: error
@@ -32,7 +33,7 @@ const getAllCategories = async (req, res) => {
             data: allCategories
         })
     } catch (error) {
-        console.log(error)
+        logger.error("error while fetching categories", error)
         res.json({
             message: "error while fetching categories",
             error: error
@@ -49,11 +50,13 @@ const getCategoryById = async (req, res) => {
                 data: foundCategory
             })
         } else {
+            logger.error("Category not found")
             res.status(404).json({
                 message: "Category not found"
             })
         }
     } catch (error) {
+        logger.error("getting error while fetching category", error)
         res.json({
             message: "getting error while fetching category",
             error: error
@@ -75,11 +78,13 @@ const updateCategory = async (req, res) => {
                 data: updatedCategory
             })
         } else {
+            logger.error("Category not found")
             res.status(404).json({
                 message: "Category not found"
             })
         }
     } catch (error) {
+        logger.error("getting error while updating category", error)
         res.json({
             message: "getting error while updating category",
             error: error
@@ -96,12 +101,13 @@ const deleteCategory = async (req, res) => {
                 data: deletedCategory
             })
         } else {
+            logger.error("Category not found")
             res.status(404).json({
                 message: "Category not found"
             })
         }
     } catch (error) {
-        console.log(error)
+        logger.error("getting error while deleting category", error)
         res.json({
             message: "getting error while deleting category",
             error: error
