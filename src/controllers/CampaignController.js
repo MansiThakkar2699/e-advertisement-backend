@@ -105,7 +105,7 @@ const deleteCampaign = async (req, res) => {
 
 const getCampaignByAdvertiserId = async (req, res) => {
     try {
-        const foundCampaign = await campaignSchema.find({ advertiser_id: req.params.advertiser_id, status: "active" }).populate("advertiser_id")
+        const foundCampaign = await campaignSchema.find({ advertiser_id: req.params.advertiser_id, status: { $ne: 'deleted' } }).populate("advertiser_id")
         if (foundCampaign) {
             res.json({
                 message: "Campaign found",

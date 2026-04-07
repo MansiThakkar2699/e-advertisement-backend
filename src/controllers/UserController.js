@@ -1,6 +1,6 @@
 const userSchema = require("../models/UserModel")
 const logger = require('../utils/logger');
-const uploadToCloudinary = require("../utils/CloudinaryUtil")
+const { uploadFromPath } = require("../utils/CloudinaryUtil")
 const bcrypt = require("bcrypt")
 const mailSend = require("../utils/MailUtil")
 const jwt = require("jsonwebtoken")
@@ -212,7 +212,7 @@ const updateUser = async (req, res) => {
     try {
         let imageUrl = null;
         if (req.file && req.file.path) {
-            const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+            const cloudinaryResponse = await uploadFromPath(req.file.path);
             imageUrl = cloudinaryResponse.secure_url;
         }
         const updatedUser = await userSchema.findByIdAndUpdate(req.params.id, { ...req.body, ...(imageUrl && { profilePic: imageUrl }) }, { new: true })

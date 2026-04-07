@@ -1,12 +1,12 @@
 const categorySchema = require("../models/CategoryModel")
-const uploadToCloudinary = require("../utils/CloudinaryUtil")
+const { uploadFromPath } = require("../utils/CloudinaryUtil")
 const logger = require('../utils/logger');
 
 const createCategory = async (req, res) => {
     try {
         let imageUrl = null;
         if (req.file && req.file.path) {
-            const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+            const cloudinaryResponse = await uploadFromPath(req.file.path);
             imageUrl = cloudinaryResponse.secure_url;
         }
 
@@ -68,7 +68,7 @@ const updateCategory = async (req, res) => {
     try {
         let imageUrl = null;
         if (req.file && req.file.path) {
-            const cloudinaryResponse = await uploadToCloudinary(req.file.path);
+            const cloudinaryResponse = await uploadFromPath(req.file.path);
             imageUrl = cloudinaryResponse.secure_url;
         }
         const updatedCategory = await categorySchema.findByIdAndUpdate(req.params.id, { ...req.body, ...(imageUrl && { image: imageUrl }) }, { new: true })

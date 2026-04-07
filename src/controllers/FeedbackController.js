@@ -148,23 +148,130 @@ const updateFeedback = async (req, res) => {
     }
 }
 
-const getFeedbackByAdvertisement = async (req, res) => {
+const getFeedbackByAdvertiser = async (req, res) => {
     try {
-        const feedback = await feedbackSchema
-            .find({ ad_id: req.params.advertisement_id })
-            .populate("viewer_id");
+        const { advertiserId } = req.params;
+        const {
+            search = "",
+            advertisement,
+            sort,
+            page = 1,
+            limit = 6
+        } = req.query;
+
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        // 1. Initial Match Stage
+        let matchStage = {};
+        if (advertisement) {
+            matchStage.ad_id = new mongoose.Types.ObjectId(advertisement);
+        }
+
+        // 2. Sorting Logic
+        let sortStage = {};
+        if (sort === "high") sortStage.rating = -1;
+        if (sort === "low") sortStage.rating = 1;
+
+        const pipeline = [
+            // Filter by advertisement ID if provided
+            { $match: matchStage },
+
+            // Join Viewer (User who gave feedback)
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "viewer_id",
+                    foreignField: "_id",
+                    as: "viewer"
+                }
+            },
+            { $unwind: "$viewer" },
+
+            // Join Advertisement
+            {
+                $lookup: {
+                    from: "advertisements",
+                    localField: "ad_id",
+                    foreignField: "_id",
+                    as: "advertisement"
+                }
+            },
+            { $unwind: "$advertisement" },
+
+            // Join Campaign (To reach advertiser_id)
+            {
+                $lookup: {
+                    from: "campaigns",
+                    localField: "advertisement.campaign_id",
+                    foreignField: "_id",
+                    as: "campaign"
+                }
+            },
+            { $unwind: "$campaign" },
+
+            // CRITICAL MATCH: Filter by the Advertiser ID from params
+            {
+                $match: {
+                    "campaign.advertiser_id": new mongoose.Types.ObjectId(advertiserId)
+                }
+            },
+
+            // Search by Viewer Name
+            {
+                $match: {
+                    "viewer.fullName": {
+                        $regex: search,
+                        $options: "i"
+                    }
+                }
+            },
+
+            // Sort rating
+            ...(Object.keys(sortStage).length ? [{ $sort: sortStage }] : [{ $sort: { createdAt: -1 } }]),
+
+            // Pagination + total count using Facet
+            {
+                $facet: {
+                    metadata: [
+                        { $count: "totalRecords" }
+                    ],
+                    data: [
+                        { $skip: (pageNumber - 1) * limitNumber },
+                        { $limit: limitNumber },
+                        // Clean up output: remove large joined objects if not needed
+                        {
+                            $project: {
+                                campaign: 0,
+                                "advertisement.campaign_id": 0
+                            }
+                        }
+                    ]
+                }
+            }
+        ];
+
+        const result = await feedbackSchema.aggregate(pipeline);
+
+        const feedbacks = result[0].data;
+        const totalRecords = result[0].metadata[0]?.totalRecords || 0;
+
         res.json({
-            message: "Feedback for advertisement fetched successfully",
-            data: feedback
+            message: "Advertiser feedback fetched successfully",
+            currentPage: pageNumber,
+            totalRecords,
+            totalPages: Math.ceil(totalRecords / limitNumber),
+            data: feedbacks
         });
+
     } catch (error) {
-        logger.error("Error fetching feedback", error)
-        res.json({
+        console.error("Error fetching feedback:", error);
+        res.status(500).json({
             message: "Error fetching feedback",
-            error: error
+            error: error.message
         });
     }
-}
+};
 
 const getFeedbackByViewer = async (req, res) => {
     try {
@@ -188,6 +295,6 @@ module.exports = {
     createFeedback,
     getAllFeedback,
     updateFeedback,
-    getFeedbackByAdvertisement,
+    getFeedbackByAdvertiser,
     getFeedbackByViewer
 }

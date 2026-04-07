@@ -1,13 +1,14 @@
 const router = require("express").Router()
 const advertisementController = require("../controllers/AdvertisementController")
-const upload = require("../middleware/UploadMiddleware")
+const { uploadToMemory } = require("../middleware/UploadMiddleware")
 const validateToken = require("../middleware/AuthMiddleware")
 
-router.post("/advertisement", validateToken, upload.single("content"), advertisementController.createAdvertisement)
+router.post("/advertisement", validateToken, uploadToMemory.single("content"), advertisementController.createAdvertisement)
 router.get("/advertisements", validateToken, advertisementController.getAllAdvertisements)
 router.get("/advertisement/:id", validateToken, advertisementController.getAdvertisementById)
 router.delete("/advertisement/:id", validateToken, advertisementController.deleteAdvertisement)
-router.put("/advertisement/:id", validateToken, upload.single("content"), advertisementController.updateAdvertisement)
-router.get("/advertisement/campaign/:campaign_id", validateToken, advertisementController.getAdvertisementByCampaignId)
+router.put("/advertisement/:id", validateToken, uploadToMemory.single("content"), advertisementController.updateAdvertisement)
+router.get("/advertisement/advertiser/:advertiserId", validateToken, advertisementController.getAdvertisementByAdvertiserId)
 router.get("/advertisement/category/:category_id", validateToken, advertisementController.getAdvertisementByCategoryId)
+router.post("/upload-builder-image", validateToken, uploadToMemory.single("image"), advertisementController.uploadBuilderImage);
 module.exports = router

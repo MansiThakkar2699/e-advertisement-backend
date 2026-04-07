@@ -20,12 +20,43 @@ const advertisementSchema = new Schema(
         },
         ad_type: {
             type: String,
-            required: true,
+            default: "Image",
             enum: ["Image", "Video"]
         },
         content: {
             type: String,
             required: true
+        },
+        design_json: {
+            canvas: {
+                width: { type: Number, default: 800 },
+                height: { type: Number, default: 450 },
+                backgroundColor: { type: String, default: "#ffffff" }
+            },
+            elements: [
+                {
+                    id: { type: String, required: true },
+                    type: {
+                        type: String,
+                        enum: ["text", "image", "button"],
+                        required: true
+                    },
+                    x: { type: Number, default: 0 },
+                    y: { type: Number, default: 0 },
+                    width: { type: Number, default: 100 },
+                    height: { type: Number, default: 50 },
+                    text: { type: String, default: "" },
+                    src: { type: String, default: "" },
+                    style: {
+                        color: { type: String, default: "#111827" },
+                        fontSize: { type: Number, default: 16 },
+                        fontWeight: { type: String, default: "400" },
+                        textAlign: { type: String, default: "left" },
+                        backgroundColor: { type: String, default: "transparent" },
+                        borderRadius: { type: Number, default: 0 }
+                    }
+                }
+            ]
         },
         status: {
             type: String,
