@@ -1,11 +1,18 @@
-const router = require("express").Router()
-const analyticsController = require("../controllers/AnalyticsController")
+const router = require("express").Router();
+const analyticsController = require("../controllers/AnalyticsController");
 
-router.post("/analytics", analyticsController.createAnalytics);
-router.get("/analytics", analyticsController.getAllAnalytics);
-router.get("/analytics/campaign/:campaign_id", analyticsController.getCampaignAnalytics);
-router.put("/analytics/impression/:campaign_id", analyticsController.updateImpression);
-router.put("/analytics/click/:campaign_id", analyticsController.updateClicks);
-router.put("/analytics/conversion/:campaign_id", analyticsController.updateConversions);
+router.post("/analytics/impression/:adId", analyticsController.incrementImpression);
+router.post("/analytics/click/:adId", analyticsController.incrementClick);
+router.post("/analytics/conversion/:adId", analyticsController.incrementConversion);
 
-module.exports = router
+router.get("/analytics/advertiser/:advertiserId", analyticsController.getAdvertiserAnalytics);
+router.get("/analytics/campaign/:campaignId", analyticsController.getCampaignAnalytics);
+router.get("/analytics/admin", analyticsController.getAdminAnalytics);
+router.get("/analytics/advertiser-campaigns/:advertiserId", analyticsController.getAdvertiserCampaignAnalytics);
+router.get("/analytics/advertiser-ads/:advertiserId", analyticsController.getAdvertiserAdAnalytics);
+
+router.get("/analytics/admin/advertisers", analyticsController.getAdminAdvertiserAnalytics);
+router.get("/analytics/admin/campaigns", analyticsController.getAdminCampaignAnalytics);
+router.get("/analytics/admin/ads", analyticsController.getAdminAdAnalytics);
+
+module.exports = router;

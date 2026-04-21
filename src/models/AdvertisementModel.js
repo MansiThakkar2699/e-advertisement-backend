@@ -27,6 +27,19 @@ const advertisementSchema = new Schema(
             type: String,
             required: true
         },
+        offer: {
+            title: {
+                type: String,
+                default: ""
+            },
+            value: {
+                type: String,
+                default: ""
+            },
+            expiry: {
+                type: Date
+            }
+        },
         design_json: {
             canvas: {
                 width: { type: Number, default: 800 },

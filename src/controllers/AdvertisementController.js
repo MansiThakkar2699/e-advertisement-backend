@@ -132,6 +132,7 @@ const getAdvertisementById = async (req, res) => {
                 populate: {
                     path: 'advertiser_id',
                     model: 'users',
+                    select: 'fullName email role status'
                 }
             })
             .populate("category_id")
@@ -250,7 +251,13 @@ const getAdvertisementByAdvertiserId = async (req, res) => {
         const { advertiserId } = req.params;
 
         const advertisements = await advertisementSchema.aggregate([
-            // 1. Join with Campaigns
+            // 1. Filter out deleted advertisements FIRST
+            {
+                $match: {
+                    status: { $ne: "deleted" }
+                }
+            },
+            // 2. Join with Campaigns
             {
                 $lookup: {
                     from: "campaigns",
@@ -261,14 +268,14 @@ const getAdvertisementByAdvertiserId = async (req, res) => {
             },
             { $unwind: "$campaign_details" },
 
-            // 2. Filter by the Advertiser ID inside the campaign
+            // 3. Filter by the Advertiser ID inside the campaign
             {
                 $match: {
                     "campaign_details.advertiser_id": new mongoose.Types.ObjectId(advertiserId)
                 }
             },
 
-            // 3. Nested Lookup: Join campaign_details.advertiser_id with 'users'
+            // 4. Nested Lookup: Join campaign_details.advertiser_id with 'users'
             {
                 $lookup: {
                     from: "users", // Your collection name for users
@@ -279,7 +286,7 @@ const getAdvertisementByAdvertiserId = async (req, res) => {
             },
             { $unwind: "$campaign_details.advertiser_id" },
 
-            // 4. Join with Categories
+            // 5. Join with Categories
             {
                 $lookup: {
                     from: "categories", // Your collection name for categories
@@ -362,6 +369,50 @@ const uploadBuilderImage = async (req, res) => {
     }
 };
 
+const updateAdStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const updated = await advertisementSchema.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        );
+        res.status(200).json({
+            message: "Status updated",
+            data: updated
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Error",
+            error: error.message
+        });
+    }
+};
+
+const getActiveAdvertisements = async (req, res) => {
+    try {
+        // Filter by status AND limit to 3
+        const ads = await advertisementSchema.find({ status: 'active' })
+            .populate({
+                path: 'campaign_id',
+                populate: {
+                    path: 'advertiser_id',
+                    model: 'users',
+                }
+            })
+            .populate("category_id");
+
+        res.status(200).json({
+            message: "active ads get successfully",
+            data: ads
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
     createAdvertisement,
     getAllAdvertisements,
@@ -370,5 +421,7 @@ module.exports = {
     deleteAdvertisement,
     getAdvertisementByAdvertiserId,
     getAdvertisementByCategoryId,
-    uploadBuilderImage
+    uploadBuilderImage,
+    updateAdStatus,
+    getActiveAdvertisements
 }

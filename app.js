@@ -30,6 +30,18 @@ app.use("/analytics", analyticsRoutes)
 const categoryRoutes = require("./src/routes/CategoryRoutes")
 app.use("/category", categoryRoutes)
 
+const viewerRoutes = require("./src/routes/ViewerRoutes");
+app.use("/viewer", viewerRoutes);
+
+const contactRoutes = require("./src/routes/ContactRoutes");
+app.use("/contact", contactRoutes);
+
+const surveyRoutes = require("./src/routes/SurveyRoutes");
+app.use("/survey", surveyRoutes);
+
+const dashboardRoutes = require("./src/routes/DashboardRoutes");
+app.use("/dashboard", dashboardRoutes);
+
 const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`server started on port ${PORT}`)

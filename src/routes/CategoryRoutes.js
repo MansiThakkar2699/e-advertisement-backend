@@ -13,4 +13,6 @@ router.put("/category/:id", validateToken, uploadToDisk.single("image"), categor
 
 router.delete("/category/:id", validateToken, categoryController.deleteCategory);
 
+router.get("/active-category", categoryController.getActiveCategories);
+
 module.exports = router;

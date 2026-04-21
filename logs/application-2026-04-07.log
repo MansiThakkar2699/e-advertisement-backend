@@ -1,2 +1,0 @@
-2026-04-07 13:36:10 [ERROR]: error while creating advertisement advertisements validation failed: category_id: Cast to ObjectId failed for value "" (type string) at path "category_id" because of "BSONError"
-2026-04-07 17:25:53 [ERROR]: error while creating advertisement advertisements validation failed: category_id: Cast to ObjectId failed for value "" (type string) at path "category_id" because of "BSONError"

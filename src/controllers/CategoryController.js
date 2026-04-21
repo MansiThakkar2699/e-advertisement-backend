@@ -115,10 +115,62 @@ const deleteCategory = async (req, res) => {
     }
 }
 
+const getActiveCategories = async (req, res) => {
+    try {
+        const categories = await categorySchema.aggregate([
+            // 1. Filter only active categories
+            {
+                $match: { status: "active" }
+            },
+            {
+                $lookup: {
+                    from: "advertisements", // Ensure this matches your collection name
+                    let: { catId: "$_id" }, // Pass category ID as a variable
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$category_id", "$$catId"] }, // Join condition
+                                        { $eq: ["$status", "active"] }        // Filter: Active ads only
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "activeAds"
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    slug: 1,
+                    status: 1,
+                    description: 1,
+                    image: 1,
+                    adsCount: { $size: "$activeAds" } // Counts the array length
+                }
+            }
+        ]);
+
+        res.json({
+            message: "Categories fetch successfully",
+            data: categories
+        })
+    } catch (error) {
+        logger.error("error while fetching categories", error)
+        res.json({
+            message: "error while fetching categories",
+            error: error
+        })
+    }
+}
+
 module.exports = {
     createCategory,
     getAllCategories,
     getCategoryById,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    getActiveCategories
 }
