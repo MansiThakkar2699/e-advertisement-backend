@@ -2,6 +2,7 @@ const advertisementSchema = require("../models/AdvertisementModel");
 const categorySchema = require("../models/CategoryModel");
 const userSchema = require("../models/UserModel");
 const campaignSchema = require("../models/CampaignModel");
+const surveySchema = require("../models/SurveyModel");
 
 const getHomeStats = async (req, res) => {
     try {
@@ -18,7 +19,9 @@ const getHomeStats = async (req, res) => {
             status: "active"
         });
 
-        const interactiveSurveys = 0;
+        const interactiveSurveys = await surveySchema.countDocuments({
+            status: "active"
+        });
 
         const campaigns = await campaignSchema.countDocuments({
             status: "active"
